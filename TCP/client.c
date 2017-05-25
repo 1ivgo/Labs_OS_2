@@ -19,9 +19,11 @@ int main(){
     socklen_t clientLen;
     struct sockaddr_in clientAddress;
  
-    char strServer[30] = "Client also was there!";
-    char strClient[30] = "";
-
+    char strServer[50] = "Сообщение от клиента";
+    char strClient[50] = "";
+	int strServerLen = sizeof(strServer);
+	int strClientLen = 0;
+	
     clientSockFd = socket (AF_INET, SOCK_STREAM, 0);
     
     clientAddress.sin_family = AF_INET;
@@ -32,9 +34,14 @@ int main(){
     if(connect(clientSockFd, (struct sockaddr *) &clientAddress, clientLen) < 0)
     	perror("Ошибка подключения");
     
+	write(clientSockFd, &strServerLen, sizeof(int));
     write(clientSockFd, strServer, sizeof(strServer));
-    read(clientSockFd, strClient, sizeof(strClient));
-    printf("%s\n", strClient);
+	
+	read(clientSockFd, &strClientLen, sizeof(int));
+    while(read(clientSockFd, strClient, sizeof(strClient)) != strClientLen)
+		printf("Чтение сообщения\n");
+	
+    printf("Клиент: %s\nРазмер: %d\n", strClient, strClientLen);
     close(clientSockFd);
 
 	return 0;
