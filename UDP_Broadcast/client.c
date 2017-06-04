@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
 
 void ErrorExit(const char *error){
 
@@ -24,7 +25,8 @@ int main(void)
     char strClient[50] = "";
     int strServerLen = sizeof(strServer);
     int strClientLen = 0;
-    int isBroadcast = 1, numOfServers = 0;
+    int isBroadcast = 1;
+    int num = 1;
 
     if((clientSockFd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
         ErrorExit("socket()");
@@ -41,11 +43,13 @@ int main(void)
     if (sendto(clientSockFd, strServer, strServerLen, 0, (struct sockaddr*) &clientAddress, clientLen) == -1)
         ErrorExit("sendto()");
 
-    if (recvfrom(clientSockFd, strClient, 50, 0, (struct sockaddr *) &serverAddress, &serverLen) == -1)
-        ErrorExit("recvfrom()");
-
-    printf("Message from: %s:%d\n", inet_ntoa(serverAddress.sin_addr), ntohs(serverAddress.sin_port));
-    printf("Message: %s\n" , strClient);
+    for(int i = 0; i < 2; i++){
+        if (recvfrom(clientSockFd, strClient, sizeof(strClient), 0, (struct sockaddr *) &serverAddress, &serverLen) == -1){
+            ErrorExit("recvfrom()");
+        }
+        printf("Message from: %s:%d\n", inet_ntoa(serverAddress.sin_addr), ntohs(serverAddress.sin_port));
+        printf("Message: %s\n" , strClient);
+     }
  
     close(clientSockFd);
     return 0;
